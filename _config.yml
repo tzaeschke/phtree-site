@@ -13,7 +13,9 @@ theme: minima
 title: PH-Tree's homepage
 description: Bookmark this to keep an eye on my project updates!
 
-twitter_username: ZooDB
+email: zoodb(at)gmx.de
+
+twitter_username: ZooDBMS
 github_username:  tzaeschke
 
 author: Tilmann Zäschke
