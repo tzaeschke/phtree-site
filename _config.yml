@@ -13,13 +13,10 @@ theme: minima
 title: PH-Tree's homepage
 description: Bookmark this to keep an eye on my project updates!
 
+twitter_username: ZooDB
+github_username:  tzaeschke
 
-# Your name to show in the footer
-author: Some Person
-
-###############################################
-# --- List of links in the navigation bar --- #
-###############################################
+author: Tilmann Zäschke
 
 navbar-links:
   About Me: "aboutme"
@@ -28,8 +25,6 @@ navbar-links:
     - PH-Tree C++: "https://www.markdowntutorial.com/"
     - TinSpin: "https://tinspin.org"
   Author's home: "https://github.com/tzaeschke/"
-
-
 
 social-network-links:
   email: "zoodb@gmx.dem"
@@ -44,10 +39,10 @@ url-pretty: "https://github.com/tzaeschke/"
 excerpt_length: 50
 
 # Whether or not to show an excerpt for every blog post in the feed page
-feed_show_excerpt: true
+#feed_show_excerpt: true
 
 # Whether or not to show a list of tags below each post preview in the feed page
-feed_show_tags: true
+#feed_show_tags: true
 
 # Add a search button to the navbar
 post_search: true
@@ -90,15 +85,8 @@ footer-hover-col: "#0085A1"
 #page-img: "/assets/img/bgimage.png"
 
 
-################
-# --- Misc --- #
-################
-
 # Ruby Date Format to show dates of posts
 date_format: "%B %-d, %Y"
-
-# Facebook App ID
-#fb_app_id: ""
 
 #################################################################################
 # --- You don't need to touch anything below here (but you can if you want) --- #
