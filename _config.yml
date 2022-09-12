@@ -1,17 +1,8 @@
-# lsi: false
-# safe: true
-# source: [your repo's top level directory]
-# incremental: false
-# highlighter: rouge
-# gist:
-#   noscript: false
-# kramdown:
-#   math_engine: mathjax
-#  syntax_highlighter: rouge
+#theme: minima
+theme: jekyll-theme-cayman
 
-theme: minima
 title: PH-Tree's homepage
-description: Bookmark this to keep an eye on my project updates!
+#description: Bookmark this to keep an eye on my project updates!
 
 email: zoodb(at)gmx.de
 
@@ -20,13 +11,7 @@ github_username:  tzaeschke
 
 keywords: "tilmann, zaeschke, zaschke, PH-tree, phtree, spatial, index, multidimensional, multi-dimensional"
 
-
-markdown: kramdown
 highlighter: rouge
-paginate: 5
-
-kramdown:
-  input: GFM
 
 exclude:
   - CHANGELOG.md
@@ -36,7 +21,3 @@ exclude:
   - LICENSE
   - screenshot.png
   - docs/
-
-plugins:
-  - jekyll-paginate
-
