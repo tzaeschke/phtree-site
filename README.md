@@ -11,6 +11,7 @@ Compared to other spatial indexes the PH-tree's strengths are:
 - Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions whwere it was about as fast as an R-Tree and faster than a kd-tree.
 - It deals well with most types of datasets, e.g. it works fine with strongly clustered data. 
 - Window queries are comparatively fast if they return a small result set, e.g. <10 entries. For larger result sets, other indexes are typically better.
+- The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-curve)](https://en.wikipedia.org/wiki/Z-order_curve).
 
 Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf) with the [TinSpin](https://tinspin.org) framework on the PH-tree Java implementation.
 
