@@ -43,5 +43,5 @@ Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
 
 # How does it work?
 
-This explanation requires the reader to have a solid understanding of the how [quadtrees](https://en.wikipedia.org/wiki/Quadtree)/[octrees](https://en.wikipedia.org/wiki/Octree) work (so please understand these first if you haven't already).
+This explanation requires the reader to have a solid understanding of how [quadtrees](https://en.wikipedia.org/wiki/Quadtree)/[octrees](https://en.wikipedia.org/wiki/Octree) work (so please understand these first if you haven't already).
 
