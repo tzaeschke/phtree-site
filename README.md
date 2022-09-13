@@ -19,8 +19,8 @@ Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/b
 
 There are currently implementations for Java and C++ available:
 
- - **C++**: by [myself](https://github.com/tzaeschke/phtree-cpp) (a fork of Improbable's implementation), by [Improbable](https://github.com/improbable-eng/phtree-cpp) by [mcxme](https://github.com/mcxme/phtree)
- - **Java**: by [myself](https://github.com/tzaeschke/phtree)
+ - **C++**: [here](https://github.com/tzaeschke/phtree-cpp) (my fork of Improbable's implementation), by [Improbable](https://github.com/improbable-eng/phtree-cpp) and by [mcxme](https://github.com/mcxme/phtree)
+ - **Java**: [here](https://github.com/tzaeschke/phtree)
 
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
 
