@@ -19,18 +19,29 @@ Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/b
 
 There are currently implementations for Java and C++ available:
 
- - [C++](https://github.com/tzaeschke/phtree-cpp)
- - [Java](https://github.com/tzaeschke/phtree)
+ - **C++**: by [myself](https://github.com/tzaeschke/phtree-cpp) (a fork of Improbable's implementation), by [Improbable](https://github.com/improbable-eng/phtree-cpp) by [mcxme](https://github.com/mcxme/phtree)
+ - **Java**: by [myself](https://github.com/tzaeschke/phtree)
 
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
 
 There is also the [TinSpin](https://tinspin.org) spatial index testing framework.
 
+## Support
+Please contact me on [Discord](https://discord.gg/GNYjyyYq) or create GitHub Issues.
 
-# Theory
 
-TODO
+## Documents
 
-## Part 3
+- The PH-tree was developed at ETH Zurich and first published in
+[The PH-Tree: A Space-Efficient Storage Structure and Multi-Dimensional Index](https://github.com/tzaeschke/phtree/blob/master/PH-Tree-v1.1-2014-06-28.pdf), 
+Tilmann Zäschke, Christoph Zimmerli and Moira C. Norrie, 
+Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
+- The current version of the PH-tree is discussed in more detail in this [The PH-Tree Revisited](https://github.com/tzaeschke/phtree/blob/master/PhTreeRevisited.pdf) (2015).
+- There is a Master thesis about [Cluster-Computing and Parallelization for the Multi-Dimensional PH-Index](http://e-collection.library.ethz.ch/eserv/eth:47729/eth-47729-01.pdf) (2015).
+- The hypercube navigation is discussed in detail in [Efficient Z-Ordered Traversal of Hypercube Indexes](https://github.com/tzaeschke/phtree/blob/master/Z-Ordered_Hypercube_Navigation.pdf) (2017).
 
-### Part 4
+
+# How does it work?
+
+This explanation requires the reader to have a solid understanding of the how [quadtrees](https://en.wikipedia.org/wiki/Quadtree)/[octrees](https://en.wikipedia.org/wiki/Octree) work (so please understand these first if you haven't already).
+
