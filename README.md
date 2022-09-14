@@ -74,4 +74,20 @@ One consequence of this is that modifications to the tree (insert/remove) will o
 
 ## Navigation
 
+### Quadrant numbering
+
+The PH-tree uses the bits of the multi-dimensional keys to determine their position in the tree. All keys that have the same leading bits are stored in the same branch of the tree.
+
+For example, in a node at level L, to determine the quadrant where a key should be inserted (or removed or looked up), it looks at the L's bit of each dimension of the key. For a 3D node with 8 quadrants (forming a cube) the L's bit of the first dimension of the key determines whether the target quadrant is on the left or the right of the cube, the L's bit of the second dimension determines whether it is at the front or the back, and the L's bit of the third dimension determines bottom vs top, see picture.
+Example of a PH-tree with three keys added, resulting in two nodes. A root node (red) and a subnode (blue).
+
+### 1D example
+
+Example with three 1D keys with 8bit values: k 0 = { 1 } b a s e   10 = { 00000001 } b a s e   2 {\displaystyle k_{0}=\{1\}_{base\ 10}=\{00000001\}_{base\ 2}} {\displaystyle k_{0}=\{1\}_{base\ 10}=\{00000001\}_{base\ 2}}, k 1 = { 1 } 10 = { 00000100 } 2 {\displaystyle k_{1}=\{1\}_{10}=\{00000100\}_{2}} {\displaystyle k_{1}=\{1\}_{10}=\{00000100\}_{2}} and k 2 = { 35 } 10 = { 00100011 } 2 {\displaystyle k_{2}=\{35\}_{10}=\{00100011\}_{2}} {\displaystyle k_{2}=\{35\}_{10}=\{00100011\}_{2}}. Adding k 0 {\displaystyle k_{0}} k_{0} and k 1 {\displaystyle k_{1}} k_{1} to an empty tree results in a single node. The two keys first differ in their 6th bit so the node has a level L = 5 {\displaystyle L=5} {\displaystyle L=5} (starting with 0). The node has a 5bit prefix representing the common 5 bits of both keys. The node has two quadrants, each key is stored in one quadrant. Adding a third key k 3 {\displaystyle k_{3}} k_{3} results in one additional node at L = 2 {\displaystyle L=2} {\displaystyle L=2} with one quadrant containing the original node as subnode and the other quadrant containing the new key k 2 {\displaystyle k_{2}} k_{2}.
+Example of a PH-tree with two 2D keys in one node
+
+### 2D example
+
+With 2D keys every node has 2 d = 4 {\displaystyle 2^{d}=4} {\displaystyle 2^{d}=4} quadrants. The position of the quadrant where a key is stored is extracted from the respective bits of the keys, one bit from each dimension. The four quadrants of the node form a 2D hypercube (quadrants may be empty). The bits that are extracted from the keys form the hypercube address h {\displaystyle h} h, for k 0 → h = { 00 } 2 {\displaystyle k_{0}\rightarrow h=\{00\}_{2}} {\displaystyle k_{0}\rightarrow h=\{00\}_{2}} and for k 1 → h = { 01 } 2 {\displaystyle k_{1}\rightarrow h=\{01\}_{2}} {\displaystyle k_{1}\rightarrow h=\{01\}_{2}}. h {\displaystyle h} h is effectively the position of the quadrant in the node's hypercube.
+
 TODO
