@@ -1,5 +1,6 @@
 #theme: minima
-theme: jekyll-theme-cayman
+theme: slate
+#theme: jekyll-theme-cayman
 
 title: PH-Tree's homepage
 #description: Bookmark this to keep an eye on my project updates!
@@ -15,9 +16,5 @@ highlighter: rouge
 
 exclude:
   - CHANGELOG.md
-  - CNAME
-  - Gemfile
-  - Gemfile.lock
   - LICENSE
-  - screenshot.png
   - docs/
