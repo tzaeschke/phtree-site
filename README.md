@@ -49,7 +49,7 @@ Let's also assume that we use store 2D point data, however, other dimensions (up
 
 The first difference to quadtrees is that a PH-tree stores only **integer coordinates**. Floating point coordinates can only be stored indirectly (a method for lossless conversion from floating point -> integer -> floating point is discussed below).
 
-The second difference is that to **root node** is fixed with a **center point at (0,0) and an edge length of 2^31**. That means that the root node represent a square that encompasses all possible coordinates (assuming 32bit coordinates as stated above).
+The second difference is that the **root node** is always fixed with a **center point at (0,0) and an edge length of 2^31**. That means that the root node represent a square that encompasses all possible coordinates (assuming 32bit coordinates as stated above).
 
 **TODO** Difference X is that in a PH-Tree, a child node does not have to be the same size as a quadrant in it's parent node. Instead, a child's size can be any fraction of the form child_length = parent_length/(2^x) as long as child_length >= 1. This is typically the case 
 
