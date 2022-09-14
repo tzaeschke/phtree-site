@@ -43,26 +43,35 @@ Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
 
 # How does it work?
 
+The PH-tree is explained in several parts. First we discuss the structure of the tree, i.e. how the data is organized. Next we discuss navigation in the tree, i.e. how we can efficiently find data or find places to insert new data.
+
+## Structure
+
 This explanation requires the reader to have a solid understanding of how [quadtrees](https://en.wikipedia.org/wiki/Quadtree)/[octrees](https://en.wikipedia.org/wiki/Octree) work (so please understand these first if you haven't already).
-For the remainder of the discussion let's assume that we store 32 bit coordinates, however, storing 64 bit or other bit widths is straight forward.
-Let's also assume that we use store 2D point data, however, other dimensions (up to 60 or more) and rectangle data is also possible.
+For the remainder of the discussion let's assume that we store 32 bit coordinates, however storing 64 bit or other bit widths is straight forward.
+Let's also assume that we use store 2D point data, however other dimensions (up to 60 or even 1000) and rectangle data is also possible.
+
+The PH-tree is similar to a quadtree in that it uses a hierarchy of nodes to order objects in space. Each node consists of four quadrants (or eight octants in 3D or more in higher dimensionality), i.e. each node splits the space in all dimensions.
 
 The first difference to quadtrees is that a PH-tree stores only **integer coordinates**. Floating point coordinates can only be stored indirectly (a method for lossless conversion from floating point -> integer -> floating point is discussed below).
 
-The second difference is that the **root node** is always fixed with a **center point at (0,0) and an edge length of 2^31**. That means that the root node represent a square that encompasses all possible coordinates (assuming 32bit coordinates as stated above).
+The second difference is that the **root node** is always fixed with a **center point at (0,0)** and an **edge length of 2^32**. That means that the root node represent a square that encompasses all possible 32 bit coorindates coordinates.
 
-**TODO** Difference X is that in a PH-Tree, a child node does not have to be the same size as a quadrant in it's parent node. Instead, a child's size can be any fraction of the form child_length = parent_length/(2^x) as long as child_length >= 1. This is typically the case 
+Another difference is that in a PH-Tree, a child node does not have to be the same size as a quadrant of it's parent node. Instead, a child's size can be any fraction of the form `child_length = parent_length/(2^x)` as long as `child_length >= 1`. For example, if all your data is between (0,0) and (1000, 1000), then the root node has exactly one child node with the center at (512,512) and edge length = 1024. All data is stored in this child and it's children (and sub-children, etc).
 
+Like a quadtree, the PH-tree subdivides each node into quadrants of equals size, thus recusively dividing space. Using integer coordinates and a fixed size root node means that all quadrants have an edge length that is a power of two. The maximum depth of the tree is 32 (the root not has an edge length of 2^32, so at depth 32 we get edge length "2^32/2^32 = 1"). Also, together with the root's center being (0,0), this means that all node's center points and corner points are integer coordinates. This brings some advantages:
 
-Like a quadtree, the PH-tree subdivides each node into quadrants of equals size, thus recusively dividing space. Using integer coordinates and a fixed large root node means that all quadrants have an edge length that is a power of two. The maximum depth of the tree is 32 (the root not has an edge length of 2^32, so at depth 32 we get edge length "2^32/2^32 = 1"). Also, it means that all node's center points and corner points are integer coordinates. This brings some advantages:
-
- * There is no room for problems caused by mathematical imprecision when dividing floating point coordinate repeatedly by 2.0.
+ * There is no room for problems caused by mathematical imprecision when dividing floating point coordinate repeatedly by `2.0`.
  * Integer division by two is faster that floating point division. In fact, the edge length can be calculated using a right-bit-shift instead of division.
  * The maximum depth is 32. This is inherently limits degeneration in case of strongly clustered data.
 
 
-DIfference X is that every node in a PH-Tree has at least two entries but most one entry per quadrant. Since a nodes has 2^dimension quadrants, every node can have up to 2^dimension entries. **For high dimensionality, nodes can get very large, but this is _not_  a problem!**
+Yet another difference is that every node in a PH-Tree has at least two entries but most one entry per quadrant (the exception is the root node which may have less than two children). Since a node has 2^dimension quadrants, every node can have up to 2^dimension entries. **For high dimensionality, nodes can get very large, but this is _not_ a problem!**
 
-Difference X is that the PH-tree is essentially a *map* (whereas the quadtree is a multi-map) in the sense that for every coordinate, there can be only one entry. In order to act as a multi-map that can store multiple entries per coordinate, the PH-tree can store a *set* or *list* of entries for each coordinate. 
+The next difference is that the PH-tree is essentially a *map* (whereas the quadtree is a multi-map) in the sense that for every coordinate, there can be only one entry. In order to act as a multi-map that can store multiple entries per coordinate, the PH-tree can store a *set* or *list* of entries for each coordinate. 
+
+One consequence of this is that modifications to the tree (insert/remove) will only ever require one node to be modified + potienially another node added or removed. There is no need (or possibility) for rebalancing. The trees shape is determined exclusively by the data, not by insertion order or other parameters.
+
+## Navigation
 
 TODO
