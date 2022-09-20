@@ -55,6 +55,33 @@ Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
 
 The PH-tree is explained in several parts. First we discuss the structure of the tree, i.e. how the data is organized. Next we discuss navigation in the tree, i.e. how we can efficiently find data or find places to insert new data.
 
+# Structure
+
+![1D example](img/1D-example-1.svg){:width="50%"}
+
+<img src="img/1D-example-1.svg" style="overflow: visible; background-size: contain;"/>
+
+<object data="img/1D-example-1.svg" type="image/svg+xml"></object>
+
+![1D example](img/1D-example-2.svg){:width="50%"}
+![Terminology](img/Terminology.svg){:width="50%"}
+<img src="img/Terminology.svg" style="overflow: visible; background-size: contain;"/>
+![2D example](img/2D-example.svg){:width="50%"}
+![2D example insert](img/2D-example-insert.svg)
+![2D example](img/2D-example-pq.svg)
+![2D example](img/2D-insert-cases.svg)
+![2D example](img/2D-insert-cases-2.svg)
+![3D example](img/3D-example.svg)
+![Hypercube](img/Hypercube.svg)
+![Hypercube addresses](img/Hypercube-address.svg)
+![PQ example](img/PQ-example.svg)
+![WQ example](img/WQ-example-1.svg)
+![WQ example](img/WQ-example-2a.svg)
+![WQ example](img/WQ-example-2b.svg)
+
+
+
+# OLD
 ## Structure
 
 This explanation requires the reader to have a solid understanding of how [quadtrees](https://en.wikipedia.org/wiki/Quadtree)/[octrees](https://en.wikipedia.org/wiki/Octree) work (so please understand these first if you haven't already).
