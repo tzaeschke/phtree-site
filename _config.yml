@@ -26,9 +26,12 @@ keywords: "tilmann, zaeschke, zaschke, PH-tree, phtree, spatial, index, multidim
 
 # Build settings
 markdown: kramdown
-theme: minima
+remote_theme: "mmistakes/minimal-mistakes@4.24.0"
+#theme: minima
 plugins:
-  - jekyll-feed
+  - jekyll-include-cache
+
+#  - jekyll-feed
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
