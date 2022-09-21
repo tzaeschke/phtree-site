@@ -132,7 +132,7 @@ From the viewpoint of a node, every point (=key) is divided into the following s
 
 Infix, prefix, postfix, ... |
 :-------------------------:|
-![Terminology](img/Terminology.png){:width="70%"} |
+![Terminology](img/Terminology.png){:width="60%"} |
 
 Commonly used variables:
 * ***d*** is the number of dimensions.
@@ -148,7 +148,7 @@ The example on the right shows a tree with two nodes. In order to insert (6,5) w
 
 A tree with two 2D-keys: (2,1) and (1.7)| A tree with two nodes
 :-------------------------:|:-------------------------:
-![2D example](img/2D-example.png){:width="90%"}|![2D example insert](img/2D-example-insert.png){:width="90%"}
+![2D example](img/2D-example.png){:width="100%"}|![2D example insert](img/2D-example-insert.png){:width="100%"}
 
 In the 1D example, the node's array was labeled "critical bit", in the 2D case it is labelled "hypercube". This means that the array forms a $d$-dimensional hypercube, see next section.
 
