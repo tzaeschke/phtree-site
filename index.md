@@ -4,13 +4,25 @@
 
 layout: home
 
+
+# layout: single
+# classes: wide
+# toc: true
+# #toc_label: "My Table of Contents"
+# toc_icon: "cog"
+# toc_sticky: true
+
+#author_profile: true
 ---
 {% include mathjax_support.html %}
 
+<!-- Kramdown TOC -->
+* TOC
+{:toc}
 
 # The PH-tree
 
-The PH-tree is a spatial index / multi-dimensional index. It is similar in function to other spatial indexes such as quadtrees, kd-trees or R-trees.
+The PH-tree is a [spatial index](https://en.wikipedia.org/wiki/Spatial_database#Spatial_index) / multi-dimensional index. It is similar in function to other spatial indexes such as [quadtree](https://en.wikipedia.org/wiki/Quadtree), [kd-tree](https://en.wikipedia.org/wiki/K-d_tree) or [R-tree](https://en.wikipedia.org/wiki/R-tree).
 
 It supports the usual operations such as insert/remove, window queries and nearest neighbor queries. It can store points or axis-aligned boxes.
 
@@ -21,9 +33,10 @@ Compared to other spatial indexes the PH-tree's strengths are:
 - Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions where nearest neighbor queries were about as fast as with an R-Tree and faster than a kd-tree.
 - It deals well with most types of datasets, e.g. it works fine with strongly clustered data. 
 - Window queries are comparatively fast if they return a small result set, e.g. up to 10-50 entries. For larger result sets, other indexes are typically better.
-- The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-curve)](https://en.wikipedia.org/wiki/Z-order_curve).
+- The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
 
 Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf) with the [TinSpin](https://tinspin.org) framework on the PH-tree Java implementation.
+
 
 # Implementations
 
@@ -35,6 +48,7 @@ PH-tree implementations that I am aware of:
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
 
 There is also the [TinSpin](https://tinspin.org) spatial index testing framework.
+
 
 ## Support
 Please contact me on [Discord](https://discord.gg/GNYjyyYq) or create GitHub Issues.
@@ -51,36 +65,168 @@ Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
 - The hypercube navigation is discussed in detail in [Efficient Z-Ordered Traversal of Hypercube Indexes](https://github.com/tzaeschke/phtree/blob/master/Z-Ordered_Hypercube_Navigation.pdf) (2017).
 
 
+
 # How does it work?
 
 The PH-tree is explained in several parts. First we discuss the structure of the tree, i.e. how the data is organized. Next we discuss navigation in the tree, i.e. how we can efficiently find data or find places to insert new data.
 
+
+
+## PH-tree vs Quadtree
+
+The PH-tree is similar to a quadtree in the sense that:
+* It uses a hierarchy of nodes to organize data
+* Each node is a square and has four quadrants (eight in 3D, in general 2dim quadrants), i.e. each node splits space in all dimensions.
+* Nodes are split into sub-nodes when they contain too many points.
+
+However, the PH-tree does some things differently in order to:
+* improve scalability with higher dimensions than 2D or 3D,
+* avoid “deep” trees when storing strongly clustered data,
+* avoid nodes with < 2 entries (except the root node), and
+* reduce reshuffling of data when nodes are split/merged.
+
+Differences in appearance to quadtrees
+* The PH-tree works with integers (it works fine with floating point numbers as well, as we discuss later)
+* The PH-tree’s “highest”possible node always has $(0,0)$ as center and an endge length $l_{max} = 2^{32}$ (for 32 bit coordinates).
+* This node may not exist in most trees, but all nodes are aligned as if it existed, e.g. no other node overlaps with $(0,0)$.
+* In a PH-tree, child nodes always have an edge length 
+$l_{child} = l_{parent} / 2^y$, with $y$ being a positive integer such that $l_{child}$ is always an $integer >= 1$, in fact $l_{child}$ is always a power of $2$. 
+* This limits the depth of a PH-tree to 32.
+* Quadrant capacity = 1, i.e. a quadrant can hold at most one entry, either a sub-node entry or a point/data entry.
+
+
 # Structure
 
-![1D example](img/1D-example-1.svg){:width="50%"}
+## 1D PH-tree
 
-<img src="img/1D-example-1.svg" style="overflow: visible; background-size: contain;"/>
+Let's start with a very simple example, a 1-dimensional PH-tree that stores 1-dimensional points, AKA simple numbers.
 
-<object data="img/1D-example-1.svg" type="image/svg+xml"></object>
+The picture below shows an example of a 1-dimensional PH-tree with 8-bit coordinates (basically a tree of sorted integers).
+First we add (1) and (4) to an empty tree, resulting in a tree with a single node. Then we add (35), resulting in a tree with a root node and one child node.
 
-![1D example](img/1D-example-2.svg){:width="50%"}
-![Terminology](img/Terminology.svg){:width="50%"}
-<img src="img/Terminology.svg" style="overflow: visible; background-size: contain;"/>
-![2D example](img/2D-example.svg){:width="50%"}
-![2D example insert](img/2D-example-insert.svg)
-![2D example](img/2D-example-pq.svg)
-![2D example](img/2D-insert-cases.svg)
-![2D example](img/2D-insert-cases-2.svg)
-![3D example](img/3D-example.svg)
-![Hypercube](img/Hypercube.svg)
-![Hypercube addresses](img/Hypercube-address.svg)
-![PQ example](img/PQ-example.svg)
-![WQ example](img/WQ-example-1.svg)
-![WQ example](img/WQ-example-2a.svg)
-![WQ example](img/WQ-example-2b.svg)
+Add (1) and (4)             |  Add (35)
+:-------------------------:|:-------------------------:
+![1D example](img/1D-example-1.png){:width="90%"} | ![1D example](img/1D-example-2.png){:width="90%"}
+
+Summary:
+* The 1D PH-Tree is equivalent to a [CritBit](https://cr.yp.to/critbit.html) [tree](https://en.wikipedia.org/wiki/Radix_tree) or [digital PATRICIA trie](https://de.wikipedia.org/wiki/Patricia-Trie).
+* The tree uses the natural ordering of keys.
+* The shape of the tree is independent of insertion order.
+* Limited depth & imbalance: Maximum depth is the number of bits of a value, usually 32 or 64. Limited depth means limited imbalance.
+* No rebalancing.
 
 
+## Some terminology
 
+A a stored **point** is also called **key** or  **coordinate**.
+A PH-tree is essentially a [map](https://en.wikipedia.org/wiki/Associative_array), so every key is associated with a **value**, forming key/value pairs.
+
+A node has (up to) $2^d$ **quadrants**, every quadrant contains $0$ or $1$ **entries**. Every entry is either a key/value pair or a key/subnode pair (subnode = child node).
+
+From the viewpoint of a node, every point (=key) is divided into the following sections:
+
+* **Infix**: all bits above the current node.
+* **Prefix**: all bits between the current node and it’s parent.
+* **Critical** bit(s): the bit(s) that represent the HC address of the point/key.
+* **Postfix**: all bits below the current node (usually only if there is no child node, otherwise called “infix of child”).
+
+Infix, prefix, postfix, ... |
+:-------------------------:|
+![Terminology](img/Terminology.png){:width="70%"} |
+
+Commonly used variables:
+* ***d*** is the number of dimensions.
+* ***w*** is the current depth of the tree, i.e. the length of the prefix. Usually we have $0 \leq w \lt 32$ or $0 \leq w \lt 64$. 
+
+
+
+## 2D PH-tree
+
+The next example (left) demonstrates how keys with multiple dimensions are stored in the tree. Note how the two relevant bits from each key represent the position in the node's array of entries/quadrants. That means in order to find the correct quadrant in a node *we only need to extract two bits from a key* to locate the relevant quadrant/entry.
+
+The example on the right shows a tree with two nodes. In order to insert (6,5) we only need to extract 2x2 bits and jump to the corresponding array slot.
+
+A tree with two 2D-keys: (2,1) and (1.7)| A tree with two nodes
+:-------------------------:|:-------------------------:
+![2D example](img/2D-example.png){:width="90%"}|![2D example insert](img/2D-example-insert.png){:width="90%"}
+
+In the 1D example, the node's array was labeled "critical bit", in the 2D case it is labelled "hypercube". This means that the array forms a $d$-dimensional hypercube, see next section.
+
+
+<!-- ![2D example](img/2D-example-pq.png){:width="50%"} -->
+<!-- ![2D example](img/2D-insert-cases.svg){:width="50%"} -->
+
+<!-- 
+There are three possible scenarios when inserting an entry:
+* a) Insertion where the infix/prefix of a node does not match: this results in insertion of a new node above the node with the infix. This is also called prefix collision or infix collision.
+* b) Insertion in an existing node.
+* c) INsertion with postfix collision. This result in insertion of a new node below the current node.
+
+Infix, prefix, postfix, ... |
+:-------------------------:|
+![2D example](img/2D-insert-cases-2.png){:width="50%"}
+ -->
+
+
+## Hypercube addressing
+
+The nodes in a PH-tree all form $d$-dimensional binary [hypercubes](https://en.wikipedia.org/wiki/Hypercube) (binary Hamming Space). "Binary" here means that in each dimension there are only two possible values: $0$ and $1$.
+
+This means, in order to address all quadrants in a node we need exactly **one bit for every dimension**.
+
+Such an address is called Hypercube address or **HC address**. A HC address is simply a number with $d$ bits: e.g. 011… 
+
+The idea here is that this allows **processing of HC addresses with up to 64 dimensions in constant time** (assuming 64 bit CPU registers)**!**
+
+<!-- ![Hypercube](img/Hypercube.png){:width="50%"} -->
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|
+![Hypercube addresses](img/Hypercube-address.png){:width="70%"} |
+
+Note that the ordering of corners results in something called **[Morton-order](https://en.wikipedia.org/wiki/Z-order_curve)** and forms a **[Z-order curve](https://en.wikipedia.org/wiki/Z-order_curve)** when quadrants are traversed in the natural order of their HC addresses.
+
+
+## Large nodes: AHC, LHC and BHC
+
+With increasing dimensionality $d$, node quickly become unwieldy due to having up to $2^d$ quadrants. Therefore, PH-tree implementations usually use
+arrays (array hypercube, or AHC) only for low dimensoinality, e.g. up to 3 or 4 dimensions. For $4 \leq d \leq 8$ implementations may use a list (LHC representation).
+For $d \gt 8$ many use trees, e.g. B+trees (BHC represenation).
+
+A 3D node in AHC (left) and LHC representation (right)|
+:-------------------------:|
+![3D example](img/3D-example.png){:width="80%"}|
+
+In the example above, the AHC implementations uses 1 bit per slot to signify occupany of a slot/quadrant. 
+
+
+
+# Queries
+
+## Point queries
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|
+![PQ example](img/PQ-example.png){:width="50%"}|
+
+
+## Window queries
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|
+![WQ example](img/WQ-example-1.png){:width="70%"}|
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|:-------------------------:
+![WQ example](img/WQ-example-2a.png){:width="70%"}|![WQ example](img/WQ-example-2b.png){:width="70%"}|
+
+
+
+
+# Performance
+
+
+<!-- 
 # OLD
 ## Structure
 
@@ -131,6 +277,7 @@ Example of a PH-tree with three keys added, resulting in two nodes. A root node 
      - Around numbers (?), curly braces require \\{ instead of \{ 
    -->
 
+<!--
 Example with three 1D keys with 8bit values:
 
 $ k_0 = \\{1\\}\_{base\ 10} = \\{00000001\\}\_{base\ 2} $, 
@@ -152,6 +299,8 @@ With 2D keys every node has $2^{d}=4$ quadrants. The position of the quadrant wh
 
 
 ![Example of a PH-tree with two 2D keys in one node](./PH-tree_Example_2D.svg)
-<img src="./img/PH-tree_Example_2D.svg">
+<img src="./img/PH-tree_Example_2D.svg"> 
+
+-->
 
 TODO
