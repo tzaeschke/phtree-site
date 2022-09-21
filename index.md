@@ -16,7 +16,7 @@ toc_sticky: true
 
 # The PH-tree
 
-The PH-tree is a spatial index / multi-dimensional index. It is similar in function to other spatial indexes such as quadtrees, kd-trees or R-trees.
+The PH-tree is a [spatial index](https://en.wikipedia.org/wiki/Spatial_database#Spatial_index) / multi-dimensional index. It is similar in function to other spatial indexes such as [quadtree](https://en.wikipedia.org/wiki/Quadtree), [kd-tree](https://en.wikipedia.org/wiki/K-d_tree) or [R-tree](https://en.wikipedia.org/wiki/R-tree).
 
 It supports the usual operations such as insert/remove, window queries and nearest neighbor queries. It can store points or axis-aligned boxes.
 
@@ -27,9 +27,10 @@ Compared to other spatial indexes the PH-tree's strengths are:
 - Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions where nearest neighbor queries were about as fast as with an R-Tree and faster than a kd-tree.
 - It deals well with most types of datasets, e.g. it works fine with strongly clustered data. 
 - Window queries are comparatively fast if they return a small result set, e.g. up to 10-50 entries. For larger result sets, other indexes are typically better.
-- The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-curve)](https://en.wikipedia.org/wiki/Z-order_curve).
+- The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
 
 Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf) with the [TinSpin](https://tinspin.org) framework on the PH-tree Java implementation.
+
 
 # Implementations
 
@@ -41,6 +42,7 @@ PH-tree implementations that I am aware of:
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
 
 There is also the [TinSpin](https://tinspin.org) spatial index testing framework.
+
 
 ## Support
 Please contact me on [Discord](https://discord.gg/GNYjyyYq) or create GitHub Issues.
@@ -55,6 +57,7 @@ Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
 - The current version of the PH-tree is discussed in more detail in this [The PH-Tree Revisited](https://github.com/tzaeschke/phtree/blob/master/PhTreeRevisited.pdf) (2015).
 - There is a Master thesis about [Cluster-Computing and Parallelization for the Multi-Dimensional PH-Index](http://e-collection.library.ethz.ch/eserv/eth:47729/eth-47729-01.pdf) (2015).
 - The hypercube navigation is discussed in detail in [Efficient Z-Ordered Traversal of Hypercube Indexes](https://github.com/tzaeschke/phtree/blob/master/Z-Ordered_Hypercube_Navigation.pdf) (2017).
+
 
 
 # How does it work?
@@ -106,9 +109,13 @@ Summary:
 * Limited depth & imbalance: Maximum depth is the number of bits of a value, usually 32 or 64. Limited depth means limited imbalance.
 * No rebalancing.
 
+
 ## Some terminology
 
 A a stored **point** is also called **key** or  **coordinate**.
+A PH-tree is essentially a [map](https://en.wikipedia.org/wiki/Associative_array), so every key is associated with a **value**, forming key/value pairs.
+
+A node has (up to) $2^d$ **quadrants**, every quadrant contains $0$ or $1$ **entries**. Every entry is either a key/value pair or a key/subnode pair (subnode = child node).
 
 From the viewpoint of a node, every point (=key) is divided into the following sections:
 
@@ -116,7 +123,6 @@ From the viewpoint of a node, every point (=key) is divided into the following s
 * **Prefix**: all bits between the current node and it’s parent.
 * **Critical** bit(s): the bit(s) that represent the HC address of the point/key.
 * **Postfix**: all bits below the current node (usually only if there is no child node, otherwise called “infix of child”).
-
 
 Infix, prefix, postfix, ... |
 :-------------------------:|
@@ -130,29 +136,91 @@ Commonly used variables:
 
 ## 2D PH-tree
 
-The next example demobstrates how keys with multiple dimensions are stored in the tree. Note how the two relevant bits from each key represent the position in the node's array of entries/quadrants. That means in order to find the correct quadrant in a node we only need to extract two bits from a key.
+The next example (left) demonstrates how keys with multiple dimensions are stored in the tree. Note how the two relevant bits from each key represent the position in the node's array of entries/quadrants. That means in order to find the correct quadrant in a node *we only need to extract two bits from a key* to locate the relevant quadrant/entry.
 
-A tree with two 2D-keys: (2,1) and (1.7)|
+The example on the right shows a tree with two nodes. In order to insert (6,5) we only need to extract 2x2 bits and jump to the corresponding array slot.
+
+A tree with two 2D-keys: (2,1) and (1.7)| A tree with two nodes
+:-------------------------:|:-------------------------:
+![2D example](img/2D-example.png){:width="90%"}|![2D example insert](img/2D-example-insert.png){:width="90%"}
+
+In the 1D example, the node's array was labeled "critical bit", in the 2D case it is labelled "hypercube". This means that the array forms a $d$-dimensional hypercube, see next section.
+
+
+<!-- ![2D example](img/2D-example-pq.png){:width="50%"} -->
+<!-- ![2D example](img/2D-insert-cases.svg){:width="50%"} -->
+
+<!-- 
+There are three possible scenarios when inserting an entry:
+* a) Insertion where the infix/prefix of a node does not match: this results in insertion of a new node above the node with the infix. This is also called prefix collision or infix collision.
+* b) Insertion in an existing node.
+* c) INsertion with postfix collision. This result in insertion of a new node below the current node.
+
+Infix, prefix, postfix, ... |
 :-------------------------:|
-![2D example](img/2D-example.png){:width="80%"}|
-
-
-
-
-![2D example insert](img/2D-example-insert.png){:width="50%"}
-![2D example](img/2D-example-pq.png){:width="50%"}
-![2D example](img/2D-insert-cases.svg){:width="50%"}
 ![2D example](img/2D-insert-cases-2.png){:width="50%"}
-![3D example](img/3D-example.png){:width="50%"}
-![Hypercube](img/Hypercube.png){:width="50%"}
-![Hypercube addresses](img/Hypercube-address.png){:width="50%"}
-![PQ example](img/PQ-example.png){:width="50%"}
-![WQ example](img/WQ-example-1.png){:width="50%"}
-![WQ example](img/WQ-example-2a.png){:width="50%"}
-![WQ example](img/WQ-example-2b.png){:width="50%"}
+ -->
+
+
+## Hypercube addressing
+
+The nodes in a PH-tree all form $d$-dimensional binary [hypercubes](https://en.wikipedia.org/wiki/Hypercube) (binary Hamming Space). "Binary" here means that in each dimension there are only two possible values: $0$ and $1$.
+
+This means, in order to address all quadrants in a node we need exactly **one bit for every dimension**.
+
+Such an address is called Hypercube address or **HC address**. A HC address is simply a number with $d$ bits: e.g. 011… 
+
+The idea here is that this allows **processing of HC addresses with up to 64 dimensions in constant time** (assuming 64 bit CPU registers)**!**
+
+<!-- ![Hypercube](img/Hypercube.png){:width="50%"} -->
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|
+![Hypercube addresses](img/Hypercube-address.png){:width="70%"} |
+
+Note that the ordering of corners results in something called **[Morton-order](https://en.wikipedia.org/wiki/Z-order_curve)** and forms a **[Z-order curve](https://en.wikipedia.org/wiki/Z-order_curve)** when quadrants are traversed in the natural order of their HC addresses.
+
+
+## Large nodes: AHC, LHC and BHC
+
+With increasing dimensionality $d$, node quickly become unwieldy due to having up to $2^d$ quadrants. Therefore, PH-tree implementations usually use
+arrays (array hypercube, or AHC) only for low dimensoinality, e.g. up to 3 or 4 dimensions. For $4 \leq d \leq 8$ implementations may use a list (LHC representation).
+For $d \gt 8$ many use trees, e.g. B+trees (BHC represenation).
+
+A 3D node in AHC (left) and LHC representation (right)|
+:-------------------------:|
+![3D example](img/3D-example.png){:width="80%"}|
+
+In the example above, the AHC implementations uses 1 bit per slot to signify occupany of a slot/quadrant. 
 
 
 
+# Queries
+
+## Point queries
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|
+![PQ example](img/PQ-example.png){:width="50%"}|
+
+
+## Window queries
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|
+![WQ example](img/WQ-example-1.png){:width="70%"}|
+
+HC addresses for 1D, 2D and 3D|
+:-------------------------:|:-------------------------:
+![WQ example](img/WQ-example-2a.png){:width="70%"}|![WQ example](img/WQ-example-2b.png){:width="70%"}|
+
+
+
+
+# Performance
+
+
+<!-- 
 # OLD
 ## Structure
 
@@ -203,6 +271,7 @@ Example of a PH-tree with three keys added, resulting in two nodes. A root node 
      - Around numbers (?), curly braces require \\{ instead of \{ 
    -->
 
+<!--
 Example with three 1D keys with 8bit values:
 
 $ k_0 = \\{1\\}\_{base\ 10} = \\{00000001\\}\_{base\ 2} $, 
@@ -224,6 +293,8 @@ With 2D keys every node has $2^{d}=4$ quadrants. The position of the quadrant wh
 
 
 ![Example of a PH-tree with two 2D keys in one node](./PH-tree_Example_2D.svg)
-<img src="./img/PH-tree_Example_2D.svg">
+<img src="./img/PH-tree_Example_2D.svg"> 
+
+-->
 
 TODO
