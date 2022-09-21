@@ -14,9 +14,22 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 title: PH-tree
-email: zoodb (AT) gmx.de
+locale: "en-US"
+subtitle: "Subtitle: Version 2.0"
+name: "Tilmann Zäschke"
+
 description: >- # this means to ignore newlines until "baseurl:"
   This is the main project site for my PH-tree project.
+
+
+url: "https://tzaeschke.github.io"
+baseurl: "/phtree-site"
+
+repository: "tzaeschke/phtree-site"
+
+
+
+email: zoodb (AT) gmx.de
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  tzaeschke
@@ -27,11 +40,11 @@ keywords: "tilmann, zaeschke, zaschke, PH-tree, phtree, spatial, index, multidim
 # Build settings
 markdown: kramdown
 remote_theme: "mmistakes/minimal-mistakes@4.24.0"
+#remote_theme: "mmistakes/minimal-mistakes@4.9.0"
 #theme: minima
 plugins:
   - jekyll-include-cache
-
-#  - jekyll-feed
+  - jekyll-feed
 
 # Exclude from processing.
 # The following items will not be processed, by default. Create a custom list
@@ -44,3 +57,16 @@ plugins:
 #   - vendor/cache/
 #   - vendor/gems/
 #   - vendor/ruby/
+
+
+footer:
+  links:
+    - label: "Twitter"
+      icon: "fab fa-fw fa-twitter-square"
+      url: "https://twitter.com/ZooDBMSs"
+    - label: "GitHub"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/tzaeschke"
+    # - label: "Instagram"
+    #   icon: "fab fa-fw fa-instagram"
+    #   url: "https://instagram.com/mmistakes"
