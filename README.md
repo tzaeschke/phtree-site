@@ -6,4 +6,4 @@ layout: home
 
 ---
 
-This is the website for the [PH-tree](ztzaeschke.github.io/phtree-site) project.
+This is the website for the [PH-tree](https://tzaeschke.github.io/phtree-site) project.
