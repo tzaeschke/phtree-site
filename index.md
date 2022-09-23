@@ -22,7 +22,7 @@ layout: home
 
 # The PH-tree
 
-The PH-tree is a [spatial index](https://en.wikipedia.org/wiki/Spatial_database#Spatial_index) / multi-dimensional index. It is similar in function to other spatial indexes such as [quadtree](https://en.wikipedia.org/wiki/Quadtree), [kd-tree](https://en.wikipedia.org/wiki/K-d_tree) or [R-tree](https://en.wikipedia.org/wiki/R-tree).
+The [PH-tree](https://en.wikipedia.org/wiki/PH-tree) is a [spatial index](https://en.wikipedia.org/wiki/Spatial_database#Spatial_index) / multi-dimensional index. It is similar in function to other spatial indexes such as [quadtree](https://en.wikipedia.org/wiki/Quadtree), [kd-tree](https://en.wikipedia.org/wiki/K-d_tree) or [R-tree](https://en.wikipedia.org/wiki/R-tree).
 
 It supports the usual operations such as insert/remove, window queries and nearest neighbor queries. It can store points or axis-aligned boxes.
 
@@ -87,7 +87,7 @@ However, the PH-tree does some things differently in order to:
 
 Differences in appearance to quadtrees
 * The PH-tree works with integers (it works fine with floating point numbers as well, as we discuss later)
-* The PH-tree’s “highest”possible node always has $(0,0)$ as center and an endge length $l_{max} = 2^{32}$ (for 32 bit coordinates).
+* The PH-tree’s “highest” possible node always has $(0,0)$ as center and an edge length $l_{max} = 2^{32}$ (for 32 bit coordinates).
 * This node may not exist in most trees, but all nodes are aligned as if it existed, e.g. no other node overlaps with $(0,0)$.
 * In a PH-tree, child nodes always have an edge length 
 $l_{child} = l_{parent} / 2^y$, with $y$ being a positive integer such that $l_{child}$ is always an $integer >= 1$, in fact $l_{child}$ is always a power of $2$. 
@@ -101,7 +101,8 @@ $l_{child} = l_{parent} / 2^y$, with $y$ being a positive integer such that $l_{
 
 Let's start with a very simple example, a 1-dimensional PH-tree that stores 1-dimensional points, AKA simple numbers.
 
-The picture below shows an example of a 1-dimensional PH-tree with 8-bit coordinates (basically a tree of sorted integers).
+The picture below shows an example of a 1-dimensional PH-tree with 8-bit coordinates (basically a tree of sorted integers). The coordinates are shown in
+bit representation (base 2).
 First we add (1) and (4) to an empty tree, resulting in a tree with a single node. Then we add (35), resulting in a tree with a root node and one child node.
 
 Add (1) and (4)             |  Add (35)
@@ -205,20 +206,123 @@ In the example above, the AHC implementations uses 1 bit per slot to signify occ
 
 ## Point queries
 
-HC addresses for 1D, 2D and 3D|
+A **point query** (**lookup**) checks whether a given key exixts. How do we find a key?
+
+For each node:
+* compare infix/prefix
+* extract HC-address from current key
+* if entry at HC-address exists: access subnode or key/postfix
+
+A simple 2D PH-tree|
 :-------------------------:|
 ![PQ example](img/PQ-example.png){:width="50%"}|
 
 
 ## Window queries
 
-HC addresses for 1D, 2D and 3D|
-:-------------------------:|
-![WQ example](img/WQ-example-1.png){:width="70%"}|
+A **window queries** (**WQ**) find all points that lie inside a rectangular and axis-aligned query window defined by it's minimum and maximum: `qMin` and `qMax`.
 
-HC addresses for 1D, 2D and 3D|
+***WARNING: the explanation of window queries is quite involved. For details and proofs please refer to the original publications, especially on "Efficient Z-Ordered Traversal of Hypercube Indexes" ([PDF](https://dl.gi.de/handle/20.500.12116/647) or [PDF](https://www.research-collection.ethz.ch/handle/20.500.11850/123617)).***
+
+Window query on a point cloud|
+:-------------------------:|
+![WQ example](img/WQ-example-1.png){:width="50%"}|
+
+Example:
+	`qMin = (-1,6);`
+	`qMax = (9,6);`
+	`query(qMin, qMax);`
+
+
+Query window overlapping with a tree node (top view)| The same tree node (side view) showing three entries.
 :-------------------------:|:-------------------------:
 ![WQ example](img/WQ-example-2a.png){:width="70%"}|![WQ example](img/WQ-example-2b.png){:width="70%"}|
+
+For each node, naïve approach:
+Iterate through all quadrants, compare each quadrants prefix with qMin/qMax.
+
+Example: `qMin/qMax = (-1,6) / (9,6)`
+
+Example query execution on one node: 
+```
+(0,0) = 		(2,1) 		-> mismatch
+(0,1) = 	 	(1,7) 		-> postfix mismatch
+(1,0) = 	 	(1xx,0xx)       -> mismatch
+(1,1) = 		(6,5) 		-> match!
+```
+
+Naïve approach 
+For each node, iterate through all quadrants:
+* calculate each quadrants corners 
+* compare each corners with qMin/qMax.
+
+There are $2^d$ quadrants and we need to compare coordinates with every entry.
+(Note: while $2^d$ sound "bad", it is basically the same with other spatial indexes, such as quadtrees or R-trees which all require comparison with all entries in a node, except that R-tree node sizes are usually limited differently)
+
+$ \rightarrow O(d * 2d)$ per node.
+
+Can we do better?
+
+
+### minPos & maxPos
+
+For each node we calculate two values `minPos` and `maxPos` as follows:
+
+```
+for (d = 0; d <= dimensions; d++) {
+    center = calcCenterOfNodeFromPrefix()
+    minPos[d] = qMin[d] >= center ? 1 : 0;
+    maxPos[d] = qMax[d] >= center ? 1 : 0;
+}
+```
+(Note: `minPos[d]`/`maxPos[d]` refer to their `d`’s bit.)
+
+Example:
+```
+query: 		qMin(-1,6) / qMax (9,6) 
+center:	 	(00000100,00000100)2 = (4,4)10 
+minPos[0] = (-1 ≥ 4) = 0 
+minPos[1] = (6 ≥ 4) = 1
+maxPos[0] = (9 ≥ 4) = 1 
+maxPos[1] = (6 ≥ 4) = 1 
+```
+We get: `-> minPos / maxPos:	(0,1)/(1,1)`
+
+How are these valuers useful?
+
+### Idea #1: min/max
+
+`minPos` and `maxPos` are the **lowest** and **highest** overlapping quadrant!
+
+In our example this removes only the first quadrant from iteration, but it may remove more. 
+Also, it is cheap, calculated in $O(d)$  per node!
+However, we still have $O(d + d * 2d)$ per node
+
+### Idea #2: check quadrant
+
+We can use `minPos` and `maxPos` to quickly check whether a quadrant at position `pos` overlaps with the query box:
+
+```hasOverlap = ((pos | minPos) & maxPos) == pos);```
+
+Example:
+```
+minPos/maxPos = (01)/(11)
+
+pos (0,1):   (01 | 01) & 11 = 01 ü
+pos (1,0):   (10 | 01) & 11 = 11 != 10  
+pos (1,1):   (11 | 01) & 11 = 11 ü 
+```
+
+Intuition:
+* `minPos` has `1` if positions with `‘0’` should be skipped
+* `maxPos` has `0` if positions with `‘1’` should be skipped
+
+This reduces complexity from $O(d + d*2d)$ to $O(d + 2d)$.
+
+Now the large nodes start looking like an advantage. We can check whether a quadrant overlaps with a query box in $O(1)$ per quadrant for up to 64 dimensions!
+
+
+### Idea #3: find next overlapping quadrant
 
 
 
