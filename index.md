@@ -35,7 +35,7 @@ Compared to other spatial indexes the PH-tree's strengths are:
 - Window queries are comparatively fast if they return a small result set, e.g. up to 10-50 entries. For larger result sets, other indexes are typically better.
 - The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
 
-Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf) with the [TinSpin](https://tinspin.org) framework on the PH-tree Java implementation.
+Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf) with the [TinSpin](http://tinspin.org) framework on the PH-tree Java implementation.
 
 
 # Implementations
@@ -47,11 +47,8 @@ PH-tree implementations that I am aware of:
 
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
 
-There is also the [TinSpin](https://tinspin.org) spatial index testing framework.
+There is also the [TinSpin](http://tinspin.org) spatial index testing framework.
 
-
-## Support
-Please contact me on [Discord](https://discord.gg/GNYjyyYq) or create GitHub Issues.
 
 
 ## Documents

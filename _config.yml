@@ -17,8 +17,12 @@ title: PH-tree
 email: zoodb (AT) gmx.de
 description: >- # this means to ignore newlines until "baseurl:"
   This is the main project site for my PH-tree project.
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "" # the base hostname & protocol for your site, e.g. http://example.com
+
+url: 'https://tzaeschke.github.io/' # your main domain
+baseurl: '/phtree-site' # if you're using custom domain keep this blank example: baseurl: ''
+
+# baseurl: "" # the subpath of your site, e.g. /blog
+# url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username:  tzaeschke
 twitter_username: ZooDBMS
 
