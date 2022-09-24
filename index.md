@@ -24,26 +24,32 @@ layout: home
 
 The [PH-tree](https://en.wikipedia.org/wiki/PH-tree) is a [spatial index](https://en.wikipedia.org/wiki/Spatial_database#Spatial_index) / multi-dimensional index. It is similar in function to other spatial indexes such as [quadtree](https://en.wikipedia.org/wiki/Quadtree), [kd-tree](https://en.wikipedia.org/wiki/K-d_tree) or [R-tree](https://en.wikipedia.org/wiki/R-tree).
 
-It supports the usual operations such as insert/remove, window queries and nearest neighbor queries. It can store points or axis-aligned boxes.
+It supports the usual operations such as insert/remove, lookup, window queries and nearest neighbor queries. It can store points or axis-aligned boxes.
 
-Compared to other spatial indexes the PH-tree's strengths are:
+The PH-tree's strengths are:
 
-- Fast insert and remove operations. There is also no rebalancing, so insertion and removal times are quite predictable.
+- Fast insert and remove operations. There is also no rebalancing, so insertion and removal execution times are quite predictable.
 - Good scalability with dataset size. It is usually slower than other indexes when working on small datasets with 100 or 1000 entries, but it scales very well with large datasets and has been tested with 100M entries.
 - Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions where nearest neighbor queries were about as fast as with an R-Tree and faster than a kd-tree.
 - It deals well with most types of datasets, e.g. it works fine with strongly clustered data. 
 - Window queries are comparatively fast if they return a small result set, e.g. up to 10-50 entries. For larger result sets, other indexes are typically better.
 - The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
 
-Here are [results from performance tests](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf) with the [TinSpin](http://tinspin.org) framework on the PH-tree Java implementation.
+Performance results can be found towards the end of this page.
 
 
 # Implementations
 
-PH-tree implementations that I am aware of:
+My PH-tree implementations:
 
- - **C++**: [here](https://github.com/tzaeschke/phtree-cpp) (my fork of Improbable's implementation), by [Improbable](https://github.com/improbable-eng/phtree-cpp) and by [mcxme](https://github.com/mcxme/phtree)
+ - **C++**: [here](https://github.com/tzaeschke/phtree-cpp) (my fork of Improbable's implementation)
  - **Java**: [here](https://github.com/tzaeschke/phtree)
+
+
+Other PH-tree implementations that I am aware of:
+
+ - **C++**: by [Improbable](https://github.com/improbable-eng/phtree-cpp), by [mcxme](https://github.com/mcxme/phtree)
+
 
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
 
