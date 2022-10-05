@@ -30,10 +30,10 @@ The PH-tree's strengths are:
 
 - Fast insert and remove operations. There is also no rebalancing, so insertion and removal execution times are quite predictable.
 - Good scalability with dataset size. It is usually slower than other indexes when working on small datasets with 100 or 1000 entries, but it scales very well with large datasets and has been tested with 100M entries.
-- Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions where nearest neighbor queries were about as fast as with an R-Tree and faster than a kd-tree.
+- Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions where nearest neighbor queries were about as fast as with an R-tree and faster than a kd-tree.
 - It deals well with most types of datasets, e.g. it works fine with strongly clustered data. 
 - Window queries are comparatively fast if they return a small result set, e.g. up to 10-50 entries. For larger result sets, other indexes are typically better.
-- The PH-Tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
+- The PH-tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
 
 Performance results can be found towards the end of this page.
 
@@ -42,13 +42,14 @@ Performance results can be found towards the end of this page.
 
 My PH-tree implementations and source code:
 
- - **C++**: [here](https://github.com/tzaeschke/phtree-cpp) (my fork of Improbable's implementation)
- - **Java**: [here](https://github.com/tzaeschke/phtree)
+ - **C++**: [https://github.com/tzaeschke/phtree-cpp](https://github.com/tzaeschke/phtree-cpp) (my fork of Improbable's implementation)
+ - **Java**: [https://github.com/tzaeschke/phtree](https://github.com/tzaeschke/phtree)
 
 
 Other PH-tree implementations that I am aware of:
 
- - **C++**: by [Improbable](https://github.com/improbable-eng/phtree-cpp), by [mcxme](https://github.com/mcxme/phtree)
+ - **C++** by [Improbable](https://github.com/improbable-eng/phtree-cpp)
+ - **C++** by [mcxme](https://github.com/mcxme/phtree)
 
 
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
@@ -86,7 +87,7 @@ The PH-tree is similar to a quadtree in the sense that:
 However, the PH-tree does some things differently in order to:
 * improve scalability with higher dimensions than 2D or 3D,
 * avoid “deep” trees when storing strongly clustered data,
-* avoid nodes with < 2 entries (except the root node), and
+* avoid nodes with $\lt 2$ entries (except for tree with $\lt 2$ entries), and
 * reduce reshuffling of data when nodes are split/merged.
 
 Differences in appearance to quadtrees
@@ -114,7 +115,7 @@ Add (1) and (4)             |  Add (35)
 ![1D example](img/1D-example-1.png){:width="90%"} | ![1D example](img/1D-example-2.png){:width="90%"}
 
 Summary:
-* The 1D PH-Tree is equivalent to a [CritBit](https://cr.yp.to/critbit.html) [tree](https://en.wikipedia.org/wiki/Radix_tree) or [digital PATRICIA trie](https://de.wikipedia.org/wiki/Patricia-Trie).
+* The 1D PH-tree is equivalent to a [CritBit](https://cr.yp.to/critbit.html) [tree](https://en.wikipedia.org/wiki/Radix_tree) or [digital PATRICIA trie](https://de.wikipedia.org/wiki/Patricia-Trie).
 * The tree uses the natural ordering of keys.
 * The shape of the tree is independent of insertion order.
 * Limited depth & imbalance: Maximum depth is the number of bits of a value, usually 32 or 64. Limited depth means limited imbalance.
@@ -127,6 +128,8 @@ A a stored **point** is also called **key** or  **coordinate**.
 A PH-tree is essentially a [map](https://en.wikipedia.org/wiki/Associative_array), so every key is associated with a **value**, forming key/value pairs.
 
 A node has (up to) $2^d$ **quadrants**, every quadrant contains $0$ or $1$ **entries**. Every entry is either a key/value pair or a key/subnode pair (subnode = child node).
+
+The quadrants in a node are identified by their **hypercube address** (**HC address**).
 
 From the viewpoint of a node, every point (=key) is divided into the following sections:
 
@@ -368,7 +371,7 @@ Complexity:
 If `inc()` executes in $O(1)$, then complexity for traversing a node is still $O(d + 2^d)$, however it is also optimal in the sense that the complexity is at the same time
 $O(d + number\\_of\\_matching\\_entries)$.
 
-This is better than quadtrees, octrees or R-Trees which all have $O(d * number\\_of\\_ALL\\_entries)$ per node$.
+This is better than quadtrees, octrees or R-trees which all have $O(d * number\\_of\\_ALL\\_entries)$ per node$.
 
 
 
@@ -521,7 +524,7 @@ This section shows the result for a synthetic dataset with stringly clustered da
 :-------------------------:|:-------------------------:
 ![WQ example](img/Perf-CLUSTER.png){:width="30%"}|
 
-We compare multiple indexes: a kd-tree (KD), a quadtree (QT0Z), a R*tree (R*Tree), and two PH-trees, one with default IEEE conversion (PH2) and one with Integer-Multiply conversion (PH2-IPP). All are written in Java and available [here](https://github.com/tzaeschke/tinspin-indexes).
+We compare multiple indexes: a kd-tree (KD), a quadtree (QT0Z), a R\*tree (R\*Tree), and two PH-trees, one with default IEEE conversion (PH2) and one with Integer-Multiply conversion (PH2-IPP). All are written in Java and available [here](https://github.com/tzaeschke/tinspin-indexes).
 
 Details and more experiments are available [here](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf).
 
