@@ -102,6 +102,18 @@ $l_{child} = l_{parent} / 2^y$, with $y$ being a positive integer such that $l_{
 
 # Structure
 
+## Overview and terminology
+
+A PH-tree is essentially a [map](https://en.wikipedia.org/wiki/Associative_array), that maps **keys** to **values**, forming key/value pairs.
+A **key** is a multi-dimensional vector of scalars, e.g. a representing a **coordinate** or **point**. For example, in 2D a key can represent $(x,y)$, in 3D it may be $(x, y, z)$.
+
+Like many other [trees](https://en.wikipedia.org/wiki/Tree_(data_structure)), the PH-tree is a hierarchy of **nodes**. 
+
+Nodes use **quadrants** to arrange their data. Every quadrant contains exactly $0$ or $1$ **entries**. Every entry is either a key/value pair (**data entry**) or key/subnode pair with a pointer to a subnode (**subnode entry**). In a PH-tree, every node can have subnode entries, data entries, or a combination of both.
+
+<!-- We will later see that (and why) a node has up to $2^{dimension}$ entries and how this scales. -->
+
+
 ## 1D PH-tree
 
 Let's start with a very simple example, a 1-dimensional PH-tree that stores 1-dimensional points, AKA simple numbers.
@@ -118,16 +130,15 @@ Summary:
 * The 1D PH-tree is equivalent to a [CritBit](https://cr.yp.to/critbit.html) [tree](https://en.wikipedia.org/wiki/Radix_tree) or [digital PATRICIA trie](https://de.wikipedia.org/wiki/Patricia-Trie).
 * The tree uses the natural ordering of keys.
 * The shape of the tree is independent of insertion order.
-* Limited depth & imbalance: Maximum depth is the number of bits of a value, usually 32 or 64. Limited depth means limited imbalance.
-* No rebalancing.
+* Limited depth & imbalance: Maximum depth is the number of bits of a key, usually 32 or 64. Limited depth means limited imbalance.
 
 
-## Some terminology
+## More terminology
 
-A a stored **point** is also called **key** or  **coordinate**.
+<!-- A a stored **point** is also called **key** or  **coordinate**.
 A PH-tree is essentially a [map](https://en.wikipedia.org/wiki/Associative_array), so every key is associated with a **value**, forming key/value pairs.
 
-A node has (up to) $2^d$ **quadrants**, every quadrant contains $0$ or $1$ **entries**. Every entry is either a key/value pair or a key/subnode pair (subnode = child node).
+A node has (up to) $2^d$ **quadrants**, every quadrant contains $0$ or $1$ **entries**. Every entry is either a key/value pair or a key/subnode pair (subnode = child node). -->
 
 The quadrants in a node are identified by their **hypercube address** (**HC address**).
 
@@ -136,7 +147,7 @@ From the viewpoint of a node, every point (=key) is divided into the following s
 * **Infix**: all bits above the current node.
 * **Prefix**: all bits between the current node and it’s parent.
 * **Critical** bit(s): the bit(s) that represent the HC address of the point/key.
-* **Postfix**: all bits below the current node (usually only if there is no child node, otherwise called “infix of child”).
+* **Postfix**: all bits below the current node (usually only if there is no child node, otherwise it's the infix of the subnode).
 
 Infix, prefix, postfix, ... |
 :-------------------------:|
@@ -524,7 +535,7 @@ This section shows the result for a synthetic dataset with stringly clustered da
 :-------------------------:|:-------------------------:
 ![WQ example](img/Perf-CLUSTER.png){:width="30%"}|
 
-We compare multiple indexes: a kd-tree (KD), a quadtree (QT0Z), a R\*tree (R\*Tree), and two PH-trees, one with default IEEE conversion (PH2) and one with Integer-Multiply conversion (PH2-IPP). All are written in Java and available [here](https://github.com/tzaeschke/tinspin-indexes).
+We compare multiple indexes: a kd-tree (KD), a quadtree (QT0Z), a R\*tree (R\*Tree), and two PH-trees, one with default [IEEE conversion](#ieee-conversion) (PH2) and one with [Integer-Multiply conversion](#integer-multiply-conversion) (PH2-IPP). All are written in Java and available [here](https://github.com/tzaeschke/tinspin-indexes).
 
 Details and more experiments are available [here](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf).
 
@@ -672,7 +683,7 @@ Unusual features:
 * Hypercube navigation exploits 64 bit constant time operations
 
 Disadvantages:
-* Quite complex to implement. 
+* Quite complex to implement because of ubiqutous bit manipulation. 
 * PH-trees are "maps" (other indexes are multi-maps), so they need a kind of collection (list/set/map) as primary value associated with every key
 * Native format is 'integer'. Fortunately there are fast and lossless conversions available.
 
