@@ -342,6 +342,8 @@ Now the large nodes start looking like an advantage. We can check whether a quad
 
 ### WQ traversal -- Idea #3: find next overlapping quadrant
 
+*Warning: Idea #3 is not required to implement an efficient PH-tree. The proposed idea works but usually provides next to no advantage, see [Caveats](#wq-traversal----idea-3----caveat).*
+
 Find a function `pos_next = inc(pos, minPos, maxPos)` that returns the next matching quadrant.
 This allows skipping quadrant for which `hasOverlap(...)` fails. The trick is that this method operates in $O(1)$, so it does not have to perform the check for
 any quadrant.
@@ -382,7 +384,7 @@ Complexity:
 If `inc()` executes in $O(1)$, then complexity for traversing a node is still $O(d + 2^d)$, however it is also optimal in the sense that the complexity is at the same time
 $O(d + number\\_of\\_matching\\_entries)$.
 
-This is better than quadtrees, octrees or R-trees which all have $O(d * number\\_of\\_ALL\\_entries)$ per node$.
+This is better than quadtrees, octrees or R-trees which all have $O(d * number\\_of\\_ALL\\_entries)$ per node.
 
 
 
