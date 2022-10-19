@@ -28,12 +28,12 @@ It supports the usual operations such as insert/remove, lookup, window queries a
 
 The PH-tree's strengths are:
 
-- Fast insert and remove operations. There is also no rebalancing, so insertion and removal execution times are quite predictable.
-- Good scalability with dataset size. It is usually slower than other indexes when working on small datasets with 100 or 1000 entries, but it scales very well with large datasets and has been tested with 100M entries.
-- Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions where nearest neighbor queries were about as fast as with an R-tree and faster than a kd-tree.
-- It deals well with most types of datasets, e.g. it works fine with strongly clustered data. 
-- Window queries are comparatively fast if they return a small result set, e.g. up to 10-50 entries. For larger result sets, other indexes are typically better.
-- The PH-tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
+* Fast insert and remove operations. There is also no rebalancing, so insertion and removal execution times are quite predictable.
+* Good scalability with dataset size. It is usually slower than other indexes when working on small datasets with 100 or 1000 entries, but it scales very well with large datasets and has been tested with 100M entries.
+* Good scalability with dimension. It works best between 3 and 10-20 dimensions. The Java versions has been tested with 1000 dimensions where nearest neighbor queries were about as fast as with an R-tree and faster than a kd-tree.
+* It deals well with most types of datasets, e.g. it works fine with strongly clustered data.
+* Window queries are comparatively fast if they return a small result set, e.g. up to 10-50 entries. For larger result sets, other indexes are typically better.
+* The PH-tree is an *ordered* tree, i.e. when traversing the data, e.g. the results of a query, the data is [Morton-ordered (z-order curve)](https://en.wikipedia.org/wiki/Z-order_curve).
 
 Performance results can be found towards the end of this page.
 
@@ -42,32 +42,27 @@ Performance results can be found towards the end of this page.
 
 My PH-tree implementations and source code:
 
- - **C++**: [https://github.com/tzaeschke/phtree-cpp](https://github.com/tzaeschke/phtree-cpp) (my fork of Improbable's implementation)
- - **Java**: [https://github.com/tzaeschke/phtree](https://github.com/tzaeschke/phtree)
-
+* **C++**: [https://github.com/tzaeschke/phtree-cpp](https://github.com/tzaeschke/phtree-cpp) (my fork of Improbable's implementation)
+* **Java**: [https://github.com/tzaeschke/phtree](https://github.com/tzaeschke/phtree)
 
 Other PH-tree implementations that I am aware of:
 
- - **C++** by [Improbable](https://github.com/improbable-eng/phtree-cpp)
- - **C++** by [mcxme](https://github.com/mcxme/phtree)
-
+* **C++** by [Improbable](https://github.com/improbable-eng/phtree-cpp)
+* **C++** by [mcxme](https://github.com/mcxme/phtree)
 
 Other spatial indexes (Java) can be found in the [TinSpin index library](https://github.com/tzaeschke/tinspin-indexes).
 
 There is also the [TinSpin](http://tinspin.org) spatial index testing framework.
 
 
-
 ## Documents
 
-- The PH-tree was developed at ETH Zurich and first published in
-[The PH-Tree: A Space-Efficient Storage Structure and Multi-Dimensional Index](https://github.com/tzaeschke/phtree/blob/master/PH-Tree-v1.1-2014-06-28.pdf), 
-Tilmann Zäschke, Christoph Zimmerli and Moira C. Norrie, 
-Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
-- The current version of the PH-tree is discussed in more detail in this [The PH-Tree Revisited](https://github.com/tzaeschke/phtree/blob/master/PhTreeRevisited.pdf) (2015).
-- There is a Master thesis about [Cluster-Computing and Parallelization for the Multi-Dimensional PH-Index](http://e-collection.library.ethz.ch/eserv/eth:47729/eth-47729-01.pdf) (2015).
-- The hypercube navigation is discussed in detail in [Efficient Z-Ordered Traversal of Hypercube Indexes](https://github.com/tzaeschke/phtree/blob/master/Z-Ordered_Hypercube_Navigation.pdf) (2017).
-- This webpage is based on [this presentation](https://github.com/tzaeschke/phtree-site/blob/main/originals/PH-tree-presentation-2018.pdf).
+* The PH-tree was developed at ETH Zurich and first published in
+[The PH-Tree: A Space-Efficient Storage Structure and Multi-Dimensional Index](https://github.com/tzaeschke/phtree/blob/master/PH-Tree-v1.1-2014-06-28.pdf), Tilmann Zäschke, Christoph Zimmerli and Moira C. Norrie, Proceedings of Intl. Conf. on Management of Data (SIGMOD), 2014
+* The current version of the PH-tree is discussed in more detail in this [The PH-Tree Revisited](https://github.com/tzaeschke/phtree/blob/master/PhTreeRevisited.pdf) (2015).
+* There is a Master thesis about [Cluster-Computing and Parallelization for the Multi-Dimensional PH-Index](http://e-collection.library.ethz.ch/eserv/eth:47729/eth-47729-01.pdf) (2015).
+* The hypercube navigation is discussed in detail in [Efficient Z-Ordered Traversal of Hypercube Indexes](https://github.com/tzaeschke/phtree/blob/master/Z-Ordered_Hypercube_Navigation.pdf) (2017).
+* This webpage is based on [this presentation](https://github.com/tzaeschke/phtree-site/blob/main/originals/PH-tree-presentation-2018.pdf).
 
 
 
@@ -80,22 +75,25 @@ The PH-tree is explained in several parts. First we discuss the structure of the
 ## PH-tree vs Quadtree
 
 The PH-tree is similar to a quadtree in the sense that:
+
 * It uses a hierarchy of nodes to organize data
 * Each node is a square and has four quadrants (eight in 3D, in general 2dim quadrants), i.e. each node splits space in all dimensions.
 * Nodes are split into sub-nodes when they contain too many points.
 
 However, the PH-tree does some things differently in order to:
+
 * improve scalability with higher dimensions than 2D or 3D,
 * avoid “deep” trees when storing strongly clustered data,
 * avoid nodes with $\lt 2$ entries (except for tree with $\lt 2$ entries), and
 * reduce reshuffling of data when nodes are split/merged.
 
 Differences in appearance to quadtrees
+
 * The PH-tree works with integers (it works fine with floating point numbers as well, as we discuss later)
 * The PH-tree’s “highest” possible node always has $(0,0)$ as center and an edge length $l_{max} = 2^{32}$ (for 32 bit coordinates).
 * This node may not exist in most trees, but all nodes are aligned as if it existed, e.g. no other node overlaps with $(0,0)$.
-* In a PH-tree, child nodes always have an edge length 
-$l_{child} = l_{parent} / 2^y$, with $y$ being a positive integer such that $l_{child}$ is always an $integer >= 1$, in fact $l_{child}$ is always a power of $2$. 
+* In a PH-tree, child nodes always have an edge length
+$l_{child} = l_{parent} / 2^y$, with $y$ being a positive integer such that $l_{child}$ is always an $integer >= 1$, in fact $l_{child}$ is always a power of $2$.
 * This limits the depth of a PH-tree to 32.
 * Quadrant capacity = 1, i.e. a quadrant can hold at most one entry, either a sub-node entry or a point/data entry.
 
@@ -107,7 +105,7 @@ $l_{child} = l_{parent} / 2^y$, with $y$ being a positive integer such that $l_{
 A PH-tree is essentially a [map](https://en.wikipedia.org/wiki/Associative_array), that maps **keys** to **values**, forming key/value pairs.
 A **key** is a multi-dimensional vector of scalars, e.g. a representing a **coordinate** or **point**. For example, in 2D a key can represent $(x,y)$, in 3D it may be $(x, y, z)$.
 
-Like many other [trees](https://en.wikipedia.org/wiki/Tree_(data_structure)), the PH-tree is a hierarchy of **nodes**. 
+Like many other [trees](https://en.wikipedia.org/wiki/Tree_(data_structure)), the PH-tree is a hierarchy of **nodes**.
 
 Nodes use **quadrants** to arrange their data. Every quadrant contains exactly $0$ or $1$ **entries**. Every entry is either a key/value pair (**data entry**) or key/subnode pair with a pointer to a subnode (**subnode entry**). In a PH-tree, every node can have subnode entries, data entries, or a combination of both.
 
@@ -127,6 +125,7 @@ Add (1) and (4)             |  Add (35)
 ![1D example](img/1D-example-1.png){:width="90%"} | ![1D example](img/1D-example-2.png){:width="90%"}
 
 Summary:
+
 * The 1D PH-tree is equivalent to a [CritBit](https://cr.yp.to/critbit.html) [tree](https://en.wikipedia.org/wiki/Radix_tree) or [digital PATRICIA trie](https://de.wikipedia.org/wiki/Patricia-Trie).
 * The tree uses the natural ordering of keys.
 * The shape of the tree is independent of insertion order.
@@ -154,8 +153,9 @@ Infix, prefix, postfix, ... |
 ![Terminology](img/Terminology.png){:width="60%"} |
 
 Commonly used variables:
+
 * ***d*** is the number of dimensions.
-* ***w*** is the current depth of the tree, i.e. the length of the prefix. Usually we have $0 \leq w \lt 32$ or $0 \leq w \lt 64$. 
+* ***w*** is the current depth of the tree, i.e. the length of the prefix. Usually we have $0 \leq w \lt 32$ or $0 \leq w \lt 64$.
 
 
 
@@ -169,7 +169,7 @@ A tree with two 2D-keys: (2,1) and (1.7)| A tree with two nodes
 :-------------------------:|:-------------------------:
 ![2D example](img/2D-example.png){:width="100%"}|![2D example insert](img/2D-example-insert.png){:width="100%"}
 
-In the 1D example, the node's array was labeled "critical bit", in the 2D case it is labelled "hypercube". This means that the array forms a $d$-dimensional hypercube, see next section.
+In the 1D example, the node's array was labeled "critical bit", in the 2D case it is labeled "hypercube". This means that the array forms a $d$-dimensional hypercube, see next section.
 
 
 <!-- ![2D example](img/2D-example-pq.png){:width="50%"} -->
@@ -193,7 +193,7 @@ The nodes in a PH-tree all form $d$-dimensional binary [hypercubes](https://en.w
 
 This means, in order to address all quadrants in a node we need exactly **one bit for every dimension**.
 
-Such an address is called Hypercube address or **HC address**. A HC address is simply a number with $d$ bits: e.g. 011… 
+Such an address is called Hypercube address or **HC address**. A HC address is simply a number with $d$ bits: e.g. 011…
 
 The idea here is that this allows **processing of HC addresses with up to 64 dimensions in constant time** (assuming 64 bit CPU registers)**!**
 
@@ -209,14 +209,14 @@ Note that the ordering of corners results in something called **[Morton-order](h
 ## Large nodes: AHC, LHC and BHC
 
 With increasing dimensionality $d$, node quickly become unwieldy due to having up to $2^d$ quadrants. Therefore, PH-tree implementations usually use
-arrays (array hypercube, or AHC) only for low dimensoinality, e.g. up to 3 or 4 dimensions. For $4 \leq d \leq 8$ implementations may use a list (LHC representation).
-For $d \gt 8$ many use trees, e.g. B+trees (BHC represenation).
+arrays (array hypercube, or AHC) only for low dimensionality, e.g. up to 3 or 4 dimensions. For $4 \leq d \leq 8$ implementations may use a list (LHC representation).
+For $d \gt 8$ many use trees, e.g. B+trees (BHC representation).
 
 A 3D node in AHC (left) and LHC representation (right)|
 :-------------------------:|
 ![3D example](img/3D-example.png){:width="80%"}|
 
-In the example above, the AHC implementations uses 1 bit per slot to signify occupany of a slot/quadrant. 
+In the example above, the AHC implementations uses 1 bit per slot to signify occupancy of a slot/quadrant.
 
 
 
@@ -224,9 +224,10 @@ In the example above, the AHC implementations uses 1 bit per slot to signify occ
 
 ## Point queries
 
-A **point query** (**lookup**) checks whether a given key exixts. How do we find a key?
+A **point query** (**lookup**) checks whether a given key exists. How do we find a key?
 
 For each node:
+
 * compare infix/prefix
 * extract HC-address from current key
 * if entry at HC-address exists: access subnode or key/postfix
@@ -247,31 +248,31 @@ Window query on a point cloud|
 ![WQ example](img/WQ-example-1.png){:width="50%"}|
 
 Example:
-	`qMin = (-1,6);`
-	`qMax = (9,6);`
-	`query(qMin, qMax);`
-
+`qMin = (-1,6);`
+`qMax = (9,6);`
+`query(qMin, qMax);`
 
 Query window overlapping with a tree node (top view)| The same tree node (side view) showing three entries.
 :-------------------------:|:-------------------------:
 ![WQ example](img/WQ-example-2a.png){:width="70%"}|![WQ example](img/WQ-example-2b.png){:width="70%"}|
 
-For each node, naïve approach:
+For each node, naive approach:
 Iterate through all quadrants, compare each quadrants prefix with qMin/qMax.
 
 Example: `qMin/qMax = (-1,6) / (9,6)`
 
-Example query execution on one node: 
-```
-(0,0) = 		(2,1) 		-> mismatch
-(0,1) = 	 	(1,7) 		-> postfix mismatch
-(1,0) = 	 	(1xx,0xx)       -> mismatch
-(1,1) = 		(6,5) 		-> match!
+Example query execution on one node:
+
+```c++
+(0,0) = (2,1)     -> mismatch
+(0,1) = (1,7)     -> postfix mismatch
+(1,0) = (1xx,0xx) -> mismatch
+(1,1) = (6,5)     -> match!
 ```
 
-Naïve approach 
-For each node, iterate through all quadrants:
-* calculate each quadrants corners 
+Naive approach: for each node, iterate through all quadrants:
+
+* calculate each quadrants corners
 * compare each corners with qMin/qMax.
 
 There are $2^d$ quadrants and we need to compare coordinates with every entry.
@@ -286,25 +287,28 @@ Can we do better?
 
 For each node we calculate two values `minPos` and `maxPos` as follows:
 
-```
+```c++
 for (d = 0; d <= dimensions; d++) {
     center = calcCenterOfNodeFromPrefix()
     minPos[d] = qMin[d] >= center ? 1 : 0;
     maxPos[d] = qMax[d] >= center ? 1 : 0;
 }
 ```
+
 (Note: `minPos[d]`/`maxPos[d]` refer to their `d`’s bit.)
 
 Example:
-```
-query: 		qMin(-1,6) / qMax (9,6) 
-center:	 	(00000100,00000100)2 = (4,4)10 
+
+```c++
+query:      qMin(-1,6) / qMax (9,6) 
+center:     (00000100,00000100)2 = (4,4)10 
 minPos[0] = (-1 ≥ 4) = 0 
 minPos[1] = (6 ≥ 4) = 1
 maxPos[0] = (9 ≥ 4) = 1 
 maxPos[1] = (6 ≥ 4) = 1 
 ```
-We get: `-> minPos / maxPos:	(0,1)/(1,1)`
+
+We get: `-> minPos / maxPos: (0,1)/(1,1)`
 
 How are these valuers useful?
 
@@ -312,7 +316,7 @@ How are these valuers useful?
 
 `minPos` and `maxPos` are the **lowest** and **highest** overlapping quadrant!
 
-In our example this removes only the first quadrant from iteration, but it may remove more. 
+In our example this removes only the first quadrant from iteration, but it may remove more.
 Also, it is cheap, calculated in $O(d)$  per node!
 However, we still have $O(d + d * 2^d)$ per node
 
@@ -323,15 +327,17 @@ We can use `minPos` and `maxPos` to quickly check whether a quadrant at position
 ```hasOverlap = ((pos | minPos) & maxPos) == pos);```
 
 Example:
-```
+
+```c++
 minPos/maxPos = (01)/(11)
 
-pos (0,1):   (01 | 01) & 11 = 01 ü
-pos (1,0):   (10 | 01) & 11 = 11 != 10  
-pos (1,1):   (11 | 01) & 11 = 11 ü 
+pos (0,1):   (01 | 01) & 11 = 01         -> overlap
+pos (1,0):   (10 | 01) & 11 = 11 != 10   -> no overlap 
+pos (1,1):   (11 | 01) & 11 = 11         -> overlap   
 ```
 
 Intuition:
+
 * `minPos` has `1` if positions with `‘0’` should be skipped
 * `maxPos` has `0` if positions with `‘1’` should be skipped
 
@@ -348,39 +354,43 @@ Find a function `pos_next = inc(pos, minPos, maxPos)` that returns the next matc
 This allows skipping quadrant for which `hasOverlap(...)` fails. The trick is that this method operates in $O(1)$, so it does not have to perform the check for
 any quadrant.
 
-```
+```c++
 long inc(pos, minPos, maxPos) {
   long r = pos | (~maxPos);
   return ((++r) & maxPos) | minPos;
 }
 ```
 
-Intuition: 
+Intuition:
+
 * We want to increment by $1$
 * We want to 'skip' all quadrants that do not overlap with the query, i.e. we want to skip all quadrants where `minPos[d]==1` or `maxPos[d]==0` (= constrained bits).
 * To achieve this, we set all constrained bits to `1`. If we add `1`, these bits will overflow to the next bit, i.e. the +1 increment will instead increment the next bit.
-* After the increment we set all contrained bits back to ther 'valid' value.
-
+* After the increment we set all constrained bits back to their 'valid' value.
 
 Example: `inc(01) => (11)`
+
 * in pos, set all bits to ‘1’ where only one value is allowed (constrained bits).
-```
+
+```c++
 pos = pos | minPos | (~maxPos) = 01 | 01 | 00 = 01;
 ```
 
-* now, if we add ‘1’ for increment, any change to a constrained bit will cause an overflow and update the next higher bit. 
-```
+* now, if we add ‘1’ for increment, any change to a constrained bit will cause an overflow and update the next higher bit.
+
+```c++
 pos++ => 01 + 1 = 10;
 ```
 
-*  then we set all the constrained bits back to their previous value.
-```
+* then we set all the constrained bits back to their previous value.
+
+```c++
 pos = (pos & maxPos) | minPos = (10 & 11) | 01 = 11;
 ```
 
 --> `inc()` finds next slot in $O(1)$ for $d < 64$
 
-Complexity: 
+Complexity:
 If `inc()` executes in $O(1)$, then complexity for traversing a node is still $O(d + 2^d)$, however it is also optimal in the sense that the complexity is at the same time
 $O(d + number\\_of\\_matching\\_entries)$.
 
@@ -390,8 +400,8 @@ This is better than quadtrees, octrees or R-trees which all have $O(d * number\\
 
 ### WQ traversal -- Idea #3 -- Caveat
 
-In practice, `inc()` is rarely useful. 
-For a normal window query, most modes usually overlap with query windows such that a very significant portion of their quadrants overlap with the query. At the same time, with higher dimensionality, most nodes use LHC or BHC representation, so there are no empty quadrant. This means iterating over all quadrants is not exepensive and combined with the cheap `checkOverlap()` this is actually very efficient.
+In practice, `inc()` is rarely useful.
+For a normal window query, most modes usually overlap with query windows such that a very significant portion of their quadrants overlap with the query. At the same time, with higher dimensionality, most nodes use LHC or BHC representation, so there are no empty quadrant. This means iterating over all quadrants is not expensive and combined with the cheap `checkOverlap()` this is actually very efficient.
 
 The problem with `pos = inc()` is that we need to look up the next entry with a kind of 'search(pos)' in a node that uses LHC or BHC, resulting in $O(\log{n})$. This is more expensive than finding the next entry with an iterator and calling `checkOverlap()` on it, even if we have to do that several times.
 
@@ -399,7 +409,8 @@ Also, `checkOverlap()` and `inc()` are both cheap compared to the node from RAM 
 
 
 **However**, `inc()` should not be dismissed:
-* It should be possiuble to implement a list (LHC) or B+tree (BHC) that uses a specialised lookup method `iter = find(pos, prev_iter)` that uses a previously returned as hint to find the next iterator in less than $O(\log{n})$.
+
+* It should be possible to implement a list (LHC) or B+tree (BHC) that uses a specialized lookup method `iter = find(pos, prev_iter)` that uses a previously returned as hint to find the next iterator in less than $O(\log{n})$.
 * It may be useful for very 'narrow' query windows that typically overlap with only very few quadrants.
 
 
@@ -408,6 +419,7 @@ Also, `checkOverlap()` and `inc()` are both cheap compared to the node from RAM 
 For each node calculate `minPos`/`maxPos`: $O(d)$
 
 Use these values:
+
 * find start/end point for iteration
 * to `checkOverlap()` whether any quadrant matches: $O(1)$
 * get next valid quadrant with `inc()`: $O(1)$
@@ -426,7 +438,7 @@ PH-tree traversal creates a Z-order curve|
 
 # Floating point keys
 
-The PH-tree can natively only store integer coordinates. There are two main approaches to storing floating point cooridnates in the PH-tree.
+The PH-tree can natively only store integer coordinates. There are two main approaches to storing floating point coordinates in the PH-tree.
 
 
 ## IEEE conversion
@@ -434,7 +446,8 @@ The PH-tree can natively only store integer coordinates. There are two main appr
 The IEEE conversion allows **fast** and **lossless conversion** from floating-point to integer and back. The name stems from the fact that the bit representation of floating point numbers, as defined by the [IEEE 754](https://en.wikipedia.org/wiki/IEEE_754) is suitable to be used as integer. The central advantages of the format is that it preserves the ordering of values (at least for positive values).
 
 Java:
-```
+
+```java
 long encode(double value) {
     long r = Double.doubleToRawLongBits(value);
     return (r >= 0) ? r : r ^ 0x7FFFFFFFFFFFFFFFL;
@@ -442,7 +455,8 @@ long encode(double value) {
 ```
 
 C++:
-```
+
+```c++
 std::int64_t encode(double value) {
     std::int64_t r;
     memcpy(&r, &value, sizeof(r));
@@ -450,22 +464,24 @@ std::int64_t encode(double value) {
 }
 ```
 
-Essentially, this takes the bit-representation of a floarting point value and treats it as integer (after some conversion for negative numbers). This preserves the total ordering of values which is all that is required for `insert()`, `remove()`, `point_query()` and `window_query()`.
+Essentially, this takes the bit-representation of a floating point value and treats it as integer (after some conversion for negative numbers). This preserves the total ordering of values which is all that is required for `insert()`, `remove()`, `point_query()` and `window_query()`.
 Other operations, such as `nearest_neighbor_query()`, need to convert coordinates back to floating point data.
 
 
 ## Integer multiply conversion
 
 Another common conversion is strategy is to multiply the floating point value with a constant and casting it to an integer:
-```
+
+```c++
 long encode(double value) {
     return (long) value * 100;
 }
 ```
 
-This is also **fast** an preserves **a certain amount of precision**. 
+This is also **fast** an preserves **a certain amount of precision**.
 
 The main advantage resulting index tends to be faster. This effect hasn’t been fully investigated, but there are two effects:
+
 * The tree is more “dense”, i.e. the length of the infix is more often zero. That allows skipping comparison of infixes when navigating the tree
 * If the implementation supports prefix-sharing (bit-streaming): Normal integer values tend to have longer common prefixes, allowing for more prefix sharing, resulting in lower memory usage and better cache usage.
 
@@ -475,32 +491,31 @@ One (slight?) problem is that the rounding affects the precision of all operatio
 
 # Prefix sharing (bit streams)
 
-All entries in a node share a common prefix. 
+All entries in a node share a common prefix.
 E.g. in the example tree, all entries in the red node share a common prefix $(00000,00000)_2$.
-
 
 Example PH-tree|
 :-------------------------:|:-------------------------:
 ![WQ example](img/PQ-example.png){:width="40%"}|
 
-To save memory, we can store the prefix (actually infix) only once per node. 
+To save memory, we can store the prefix (actually infix) only once per node.
 
-Using the example on the right: 
-* normal storage: `2 keys * 2 dimensions * 8 bit = 32 bit`
-* prefix sharing: 
-`(1 prefix * 2 dim * 1 bit) + (2 keys * 2 dim * 2 bit) = 2 + 8 bit = 10 bit`
+Let's look at the red node in the example above (excluding bits for array of entries):
+
+* normal storage: `2 keys = 2 * 2 dimensions * 8 bit = 32 bit`
+* prefix sharing: `1 prefix + 2 keys = (1 * 2 dim * 1 bit) + (2 * 2 dim * 2 bit) = 2 + 8 bit = 10 bit`
 
 The bits above the infix can be taken from the parent node. The bits above the postfix are equal to the array position.
 
 Prefix sharing is not a necessary part of PH-tree, but it can be a useful performance optimization.
-This approach can safe a lot of memory, especially when used with multiply-conversion. With the Java implementation this gave performance improvemenmts of 20%-30% for most operations.
+This approach can safe a lot of memory, especially when used with multiply-conversion. With the Java implementation this gave performance improvements of 20%-30% for most operations.
 The C++ implementation does not currently implement this.
 
 
 
 # Rectangles & boxes as key
 
-The plain PH-tree can only store points (vectors) as keys. However, storing axis-aligned boxes as keys can efficiently be done by putting the two defining corners (minima and maxima) of a box into a single $2*d$ key, for example by concatenating them:
+The plain PH-tree can only store points (vectors) as keys. However, storing axis-aligned boxes as keys can efficiently be done by putting the two defining corners (minimum and maximum) of a box into a single $2*d$ key, for example by concatenating them:
 
 $ k = \\{ min_0, min_1, …, min_{d−1}, max_0, max_1, …, max_{d−1} \\}$
 
@@ -516,7 +531,7 @@ Or, for a window query that matches all boxes that intersect with a query box:
 $kmin = \\{ −\infty,    −\infty, ...,    −\infty, min_0, min_1, …, min_{d−1} \\} $
 $kmax = \\{ max_0, max_1, ..., max_{d−1},   +\infty,  +\infty, …,    +\infty \\}$
 
-Example: 
+Example:
 <!-- $qMin/qMax = (3,4)/(4,5) → (−\infty, −\infty, 3, 4)/(4, 5, +\infty, +\infty)$ -->
 
 $qMin = (3,4) → (−\infty, −\infty, 3, 4)$
@@ -531,7 +546,7 @@ This is usually managed internally by the implementation. For more details pleas
 
 <!-- Detailed performance measurements (java implementation) are available [here](https://github.com/tzaeschke/TinSpin/blob/master/doc/benchmark-2017-01/Diagrams.pdf). -->
 
-This section shows the result for a synthetic dataset with stringly clustered data. The dataset forms a cube between $(0...1)$ in any dimension with uniformly random distributed clusters. Each cluster consists of 100s or 1000s or more points (floating point coordinates).
+This section shows the result for a synthetic dataset with strongly clustered data. The dataset forms a cube between $(0...1)$ in any dimension with uniformly random distributed clusters. Each cluster consists of 100s or 1000s or more points (floating point coordinates).
 
 2D CLUSTER dataset (each blob is a cluster)|
 :-------------------------:|:-------------------------:
@@ -564,9 +579,9 @@ Note that this was measured by filling up an empty index until it contained the 
 
 ### Point update (move to new position)
 
-This is essentially a combined `remove()` + `insert()`. Here the PH-trees are the fastest. 
+This is essentially a combined `remove()` + `insert()`. Here the PH-trees are the fastest.
 
-`update()`| 
+`update()`|
 :-------------------------:|
 ![WQ example](img/Perf-3D-CL-update.png){:width="80%"}|
 
@@ -576,7 +591,7 @@ This is essentially a combined `remove()` + `insert()`. Here the PH-trees are th
 
 Find 10 nearest neighbors. The R*tree is the fastest for smaller trees, the PH-trees (especially the Integer-Multiply variant) is fastest for larger trees.
 
-`10 NN`| 
+`10 NN`|
 :-------------------------:|
 ![WQ example](img/Perf-3D-CL-10NN.png){:width="80%"}|
 
@@ -586,14 +601,14 @@ Find 10 nearest neighbors. The R*tree is the fastest for smaller trees, the PH-t
 
 Find all points in a rectangular query window. Query windows are sized such that on average 1000 point are found. R*Trees and quadtrees deliver the best performance in this scenario.
 
-`window_query()` returning ~1000 results| 
+`window_query()` returning ~1000 results|
 :-------------------------:|
 ![WQ example](img/Perf-3D-CL-WQ-1000.png){:width="80%"}|
 
 
 The following tests use indexes with 1'000'000 entries and measure how the query window size affects performance. Query windows are size such that they return on average 1, 10, 100 or 1000 points. We show the same data twice, once with logarithm y-axes (top) and once with linear y-axis (bottom).
 
-`window_query()` returning ~1000 results| 
+`window_query()` returning ~1000 results|
 :-------------------------:|
 ![WQ example](img/Perf-3D-CL-WQ-1M-log.png){:width="80%"}|
 :-------------------------:|
@@ -608,7 +623,7 @@ The following tests use indexes with 1'000'000 entries and measure how the query
 
 The PH-tree consume the least amount of memory (closely followed by the quadtree).
 
-memory consumption [bytes per entry] | 
+memory consumption [bytes per entry] |
 :-------------------------:|
 ![WQ example](img/Perf-3D-CL-memory.png){:width="80%"}|
 
@@ -636,9 +651,9 @@ The kd-tree is the fastest and R*tree the slowest. Unlike most other indexes, th
 
 ### Point update (move to new position)
 
-As before, this is essentially a combined `remove()` + `insert()`. Again, the PH-trees are the fastest, but degrading somewhat with index size. 
+As before, this is essentially a combined `remove()` + `insert()`. Again, the PH-trees are the fastest, but degrading somewhat with index size.
 
-`update()`| 
+`update()`|
 :-------------------------:|
 ![WQ example](img/Perf-DIM-CL-update.png){:width="80%"}|
 
@@ -646,9 +661,9 @@ As before, this is essentially a combined `remove()` + `insert()`. Again, the PH
 
 ### 10 nearest neighbor queries
 
-Find 10 nearest neighbors. The R*tree and PH-trees are the fastest, with the Multiply-Conversion PH-tree gaining an edge with increasing dimensoinality (diagram uses logarithmic scale!).
+Find 10 nearest neighbors. The R*tree and PH-trees are the fastest, with the Multiply-Conversion PH-tree gaining an edge with increasing dimensionality (diagram uses logarithmic scale!).
 
-`10 NN` (logarithmic scale!)| 
+`10 NN` (logarithmic scale!)|
 :-------------------------:|
 ![WQ example](img/Perf-DIM-CL-10NN.png){:width="80%"}|
 
@@ -660,7 +675,7 @@ Find all points in a rectangular query window. Query windows are sized such that
 
 Again for large query windows (1000 results) in low dimensionality, PH-trees are not the best, but scale well and come out top for $d \ge 10$.
 
-`window_query()` returning ~1000 results  (logarithmic scale!)| 
+`window_query()` returning ~1000 results  (logarithmic scale!)|
 :-------------------------:|
 ![WQ example](img/Perf-DIM-CL-WQ.png){:width="80%"}|
 
@@ -669,23 +684,27 @@ Again for large query windows (1000 results) in low dimensionality, PH-trees are
 # Conclusion
 
 Advantages:
+
 * Fast `insert()` and especially `update()` operations
 * Scales well with large datasets
 * Scales well with increasing dimensionality
 * Performs well with strongly clustered data
 
 General features:
+
 * points or rectangle keys
 * integer and floating point data
 * insert/update/remove, point query, window query, kNN search
 
 Unusual features:
+
 * Z-ordered
 * no rebalancing: may benefit concurrency or persistence
 * Hypercube navigation exploits 64 bit constant time operations
 
 Disadvantages:
-* Quite complex to implement because of ubiqutous bit manipulation. 
+
+* Quite complex to implement because of ubiquitous bit manipulation.
 * PH-trees are "maps" (other indexes are multi-maps), so they need a kind of collection (list/set/map) as primary value associated with every key
 * Native format is 'integer'. Fortunately there are fast and lossless conversions available.
 
