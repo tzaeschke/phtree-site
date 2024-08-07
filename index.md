@@ -710,6 +710,6 @@ Disadvantages:
 
 For questions/suggestions please contact me:
 
-* [PH-tree Discord server](https://discord.gg/2XGEYAbA)
+* [PH-tree Discord server](https://discord.gg/YmJTWYHPCA)
 * email:  `zoodb (AT) gmx.de`
 * GitHub Issues: [C++](https://github.com/tzaeschke/phtree-cpp), [Java](https://github.com/tzaeschke/phtree)
