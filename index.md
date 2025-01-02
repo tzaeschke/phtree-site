@@ -47,6 +47,7 @@ My PH-tree implementations and source code:
 
 Other PH-tree implementations that I am aware of:
 
+* **C** by [DDexxeDD](https://github.com/DDexxeDD/phtree-c)
 * **C++** by [Improbable](https://github.com/improbable-eng/phtree-cpp)
 * **C++** by [mcxme](https://github.com/mcxme/phtree)
 
